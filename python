@@ -1,0 +1,82 @@
+import json
+
+class Medicine:
+    def __init__(self, name, price, stock):
+        self.name = name
+        self.price = price
+        self.stock = stock
+
+class Pharmacy:
+    def __init__(self, filename='medicines.json'):
+        self.filename = filename
+        self.medicines = self.load_medicines()
+
+    def load_medicines(self):
+        try:
+            with open(self.filename, 'r') as file:
+                data = json.load(file)
+                return [Medicine(**med) for med in data]
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def save_medicines(self):
+        with open(self.filename, 'w') as file:
+            json.dump([med.__dict__ for med in self.medicines], file, indent=4)
+
+    def add_medicine(self, name, price, stock):
+        medicine = Medicine(name, price, stock)
+        self.medicines.append(medicine)
+        self.save_medicines()
+        print(f"Added: {name} - Price: ${price:.2f}, Stock: {stock}")
+
+    def view_medicines(self):
+        if not self.medicines:
+            print("No medicines in stock.")
+            return
+        for index, med in enumerate(self.medicines, start=1):
+            print(f"{index}. {med.name} - Price: ${med.price:.2f}, Stock: {med.stock}")
+
+    def update_medicine(self, index, name, price, stock):
+        if 0 <= index < len(self.medicines):
+            self.medicines[index].name = name
+            self.medicines[index].price = price
+            self.medicines[index].stock = stock
+            self.save_medicines()
+            print(f"Updated: {name} - Price: ${price:.2f}, Stock: {stock}")
+        else:
+            print("Invalid medicine index.")
+
+def main():
+    pharmacy = Pharmacy()
+    while True:
+        print("\nPharmacy Management Menu:")
+        print("1. Add Medicine")
+        print("2. View Medicines")
+        print("3. Update Medicine")
+        print("4. Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            name = input("Enter medicine name: ")
+            price = float(input("Enter medicine price: "))
+            stock = int(input("Enter stock quantity: "))
+            pharmacy.add_medicine(name, price, stock)
+        elif choice == '2':
+            pharmacy.view_medicines()
+        elif choice == '3':
+            pharmacy.view_medicines()
+            index = int(input("Enter the medicine number to update: ")) - 1
+            name = input("Enter new medicine name: ")
+            price = float(input("Enter new medicine price: "))
+            stock = int(input("Enter new stock quantity: "))
+            pharmacy.update_medicine(index, name, price, stock)
+        elif choice == '4':
+            print("Exiting Pharmacy Management. Goodbye!")
+            break
+        else:
+            print("Invalid choice, please try again.")
+
+if __name__ == "__main__":
+    main()
+
